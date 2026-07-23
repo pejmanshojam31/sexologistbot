@@ -41,9 +41,10 @@ main.py           -> runs the above in order, skips papers already posted
    If the bot doesn't show up in that search, you have the wrong username —
    check the exact `@name` BotFather gave you (it always ends in `bot`).
 
-5. **Get your channel ID**: if your channel is public, it's just
-   `@your_channel_name`. If private (invite link looks like `t.me/+AbCd...`),
-   you need the numeric ID:
+5. **Get your channel ID.** A public channel can use `@your_channel_name`, but
+   the **numeric ID is the better choice either way** — it works for public and
+   private channels alike, and it doesn't break if you later rename the channel
+   or switch it back to private. Two ways to get it:
 
    - Post any message in the channel, forward it to `@userinfobot`, and it
      replies with an ID like `-1001234567890`. Include the leading `-100`.
@@ -108,7 +109,8 @@ The `posts/` folder fills up with dated markdown files with frontmatter —
 that's the format Hugo, Jekyll, Astro, and Eleventy all expect. Cheapest
 path: point a free Hugo/Jekyll site at this repo and host it on GitHub
 Pages — zero monthly cost, updates automatically since the Action commits
-new posts. If you already run WordPress, set `publish_target: "wordpress"`
+new posts. (Pages is free for public repos; on a private repo it needs a
+paid plan.) If you already run WordPress, set `publish_target: "wordpress"`
 in `config/settings.yaml` and fill in the `WORDPRESS_*` values in `.env`
 instead.
 
