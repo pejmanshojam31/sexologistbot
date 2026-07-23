@@ -30,12 +30,26 @@ main.py           -> runs the above in order, skips papers already posted
 3. **Create a Telegram bot**: message **@BotFather** on Telegram, run
    `/newbot`, follow the prompts, copy the token it gives you.
 
-4. **Add the bot to your channel as an admin** (Channel -> Administrators ->
-   Add Admin -> your bot). It needs admin rights to post.
+4. **Add the bot to your channel as an admin.** A bot *cannot* join through an
+   invite link — invite links only work for human accounts. You have to add it
+   from inside the channel:
+
+   Open the channel -> tap the channel name -> **Edit** (pencil) ->
+   **Administrators** -> **Add Admin** -> type your bot's `@username` ->
+   select it -> make sure **Post Messages** is on -> **Done**.
+
+   If the bot doesn't show up in that search, you have the wrong username —
+   check the exact `@name` BotFather gave you (it always ends in `bot`).
 
 5. **Get your channel ID**: if your channel is public, it's just
-   `@your_channel_name`. If private, forward any message from the channel
-   to `@userinfobot` to get the numeric ID (looks like `-1001234567890`).
+   `@your_channel_name`. If private (invite link looks like `t.me/+AbCd...`),
+   you need the numeric ID:
+
+   - Post any message in the channel, forward it to `@userinfobot`, and it
+     replies with an ID like `-1001234567890`. Include the leading `-100`.
+   - Or, once the bot is an admin, post a message in the channel and open
+     `https://api.telegram.org/bot<YOUR_TOKEN>/getUpdates` in a browser —
+     the ID is under `channel_post.chat.id`.
 
 6. Copy `.env.example` to `.env` and fill in the values from steps 2-5.
 
@@ -50,6 +64,25 @@ main.py           -> runs the above in order, skips papers already posted
    "Nothing new to post", raise `lookback_days` in `config/settings.yaml`
    to 30 for the first run — the target journals publish a few papers a week,
    not daily.
+
+## Posting a specific paper
+
+Useful for launching the channel, or reposting something notable:
+
+```
+.venv/bin/python main.py --pmid 42479982 --dry-run    # preview, sends nothing
+.venv/bin/python main.py --pmid 42479982              # summarize + post
+```
+
+If you don't have Anthropic API credit yet, you can supply the summary
+yourself and skip the API entirely:
+
+```
+.venv/bin/python main.py --pmid 42479982 --summary-file examples/42479982.json
+```
+
+The file is just `{"summary_en": "...", "summary_fa": "..."}`. See
+`examples/42479982.json`.
 
 ## Running it daily (pick one)
 

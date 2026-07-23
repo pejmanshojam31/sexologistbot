@@ -104,6 +104,14 @@ def _efetch(pmids: list[str], api_key: str | None) -> list[dict]:
     return papers
 
 
+def fetch_by_pmid(pmid: str) -> dict:
+    """Fetch a single paper by PubMed ID, bypassing journal/keyword filtering."""
+    papers = _efetch([pmid], os.getenv("NCBI_API_KEY") or None)
+    if not papers:
+        raise ValueError(f"PMID {pmid} not found, or it has no abstract to summarize.")
+    return papers[0]
+
+
 def keyword_match(paper: dict, keywords: list[str]) -> bool:
     text = f"{paper['title']} {paper['abstract']}".lower()
     return any(kw.lower() in text for kw in keywords)
