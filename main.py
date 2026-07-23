@@ -20,6 +20,7 @@ import os
 import yaml
 from dotenv import load_dotenv
 
+from fetch_classics import fetch_top_cited
 from fetch_papers import fetch_by_pmid, fetch_candidates
 from post_blog import publish_markdown, publish_wordpress
 from post_telegram import build_message, hashtag_line, post_to_telegram
@@ -73,6 +74,16 @@ def process(paper: dict, cfg: dict, summary: dict | None = None, dry_run: bool =
     save_posted_id(paper["pmid"])
 
 
+def pick_classic(cfg: dict, posted_ids: set) -> dict | None:
+    """Most-cited unposted paper from the configured archive year range."""
+    return fetch_top_cited(
+        cfg,
+        cfg.get("classic_year_from", 2005),
+        cfg.get("classic_year_to", 2024),
+        posted_ids,
+    )
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="Post a summarized sex-research paper.")
     ap.add_argument("--pmid", help="post one specific PubMed ID instead of searching")
@@ -82,6 +93,16 @@ def main() -> None:
         help="JSON file with summary_en/summary_fa; skips the Anthropic API call",
     )
     ap.add_argument("--lookback", type=int, help="override lookback_days (useful for backfill)")
+    ap.add_argument(
+        "--classic",
+        action="store_true",
+        help="post the most-cited paper from earlier years instead of searching for new ones",
+    )
+    ap.add_argument(
+        "--fallback-classic",
+        action="store_true",
+        help="if no new papers were found, fall back to a most-cited one (for the daily cron)",
+    )
     args = ap.parse_args()
 
     with open(CONFIG_PATH) as f:
@@ -103,6 +124,17 @@ def main() -> None:
         return
 
     posted_ids = load_posted_ids()
+
+    if args.classic:
+        paper = pick_classic(cfg, posted_ids)
+        if not paper:
+            print("No unposted highly-cited papers left in that year range. Done.")
+            return
+        print(f"Archive pick ({paper['cited_by']} citations): {paper['title'][:70]}...")
+        process(paper, cfg, summary=summary, dry_run=args.dry_run)
+        print("Done.")
+        return
+
     lookback = args.lookback or cfg["lookback_days"]
 
     n = len(cfg.get("topic_journals", [])) + len(cfg.get("general_journals", []))
@@ -112,6 +144,14 @@ def main() -> None:
     print(f"Found {len(candidates)} new keyword-matching paper(s).")
 
     if not candidates:
+        if args.fallback_classic:
+            print("Nothing new. Falling back to a highly-cited paper...")
+            paper = pick_classic(cfg, posted_ids)
+            if paper:
+                print(f"Archive pick ({paper['cited_by']} citations): {paper['title'][:70]}...")
+                process(paper, cfg, summary=summary, dry_run=args.dry_run)
+                print("Done.")
+                return
         print("Nothing new to post. Done.")
         return
 

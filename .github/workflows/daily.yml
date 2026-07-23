@@ -28,7 +28,9 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
           NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
-        run: python main.py
+        # --fallback-classic: these journals don't publish daily, so on quiet
+        # days post the most-cited paper from earlier years instead of nothing.
+        run: python main.py --fallback-classic
 
       - name: Commit new post + updated posted-id log
         run: |

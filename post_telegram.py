@@ -51,16 +51,24 @@ def article_link(paper: dict) -> str:
     return paper.get("journal_url") or paper["url"]
 
 
+def _fa_digits(value) -> str:
+    return str(value).translate(str.maketrans("0123456789", "۰۱۲۳۴۵۶۷۸۹"))
+
+
 def build_message(paper: dict, summary_en: str, summary_fa: str, hashtags: str = "") -> str:
+    """Channel post. Farsi only -- summary_en is kept for the blog, not posted."""
     link = article_link(paper)
-    header = (
-        f"📄 <b>{_esc(paper['title'])}</b>\n"
-        f"<i>{_esc(paper['journal'])}, {_esc(paper['year'])}</i>\n\n"
-    )
-    footer = f'\n\n<a href="{_esc(link)}">Read the paper</a>'
+
+    byline = f"<i>{_esc(paper['journal'])}, {_esc(paper['year'])}</i>"
+    if paper.get("cited_by"):
+        # Only set for archive picks, where the citation count is the point.
+        byline += f"\n<i>🔗 {_fa_digits(paper['cited_by'])} استناد</i>"
+    header = f"📄 <b>{_esc(paper['title'])}</b>\n{byline}\n\n"
+
+    footer = f'\n\n<a href="{_esc(link)}">مطالعه‌ی مقاله</a>'
     if hashtags:
         footer += f"\n\n{_esc(hashtags)}"
-    body = f"{_esc(summary_en)}\n\n🔹 <b>خلاصه فارسی:</b>\n{_esc(summary_fa)}"
+    body = _esc(summary_fa)
 
     budget = MAX_LEN - len(header) - len(footer)
     if len(body) > budget:

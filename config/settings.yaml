@@ -69,7 +69,8 @@ exclude_keywords:
   - "beetle"
   - "insect"
   - "livestock"
-  - "in vitro"
+  # NB: do not add "in vitro" here -- it matches "in vitro fertilization",
+  # which is exactly the clinical reproductive work this channel wants.
   # evolutionary-biology framing: reliably animal work, never this channel's topic
   - "sexual selection"
   - "experimental evolution"
@@ -85,6 +86,14 @@ summarizer: "you"
 # prompt and outside sources are explicitly disallowed, so there is nothing for
 # the higher efforts to research -- "lite" is the right choice here.
 you_research_effort: "lite"
+
+# Archive mode (--classic, or --fallback-classic when nothing new was found):
+# the most-cited paper from these years, via Europe PMC's citation counts.
+# PubMed itself has no citation data, which is why that one search uses a
+# different source. Keep the upper bound a couple of years back -- recent
+# papers haven't had time to accumulate citations.
+classic_year_from: 2005
+classic_year_to: 2024
 
 # How many days back to search each run (run daily -> 1-2 is usually enough;
 # set higher for the first run to backfill, or use --lookback).

@@ -72,6 +72,29 @@ main.py           -> runs the above in order, skips papers already posted
    to 30 for the first run — the target journals publish a few papers a week,
    not daily.
 
+## Archive mode: most-cited papers from earlier years
+
+These journals don't publish every day, so on quiet days the bot can post a
+landmark paper instead of nothing:
+
+```
+./run.sh --classic --dry-run     # preview the most-cited unposted paper
+./run.sh --classic               # post it
+./run.sh --fallback-classic      # search for new papers, fall back if none
+```
+
+The daily GitHub Action uses `--fallback-classic`, so the channel gets a post
+every day either way. Year range is `classic_year_from`/`classic_year_to` in
+`config/settings.yaml`.
+
+This one search uses **Europe PMC** rather than PubMed, because PubMed exposes
+no citation data at all. Only the PMIDs come from Europe PMC; the records
+themselves are still fetched from PubMed so every paper has the same shape.
+
+The keyword filter applies here exactly as it does to the daily search — and it
+matters more. Without it, "most cited paper in Nature Communications" is a
+bioinformatics tool with 11,000 citations.
+
 ## Posting a specific paper
 
 Useful for launching the channel, or reposting something notable:
