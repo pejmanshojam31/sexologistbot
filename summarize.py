@@ -4,6 +4,7 @@ into Farsi. Uses the Anthropic API directly (pip install anthropic).
 """
 import json
 import os
+import re
 
 import anthropic
 
@@ -35,5 +36,21 @@ Abstract: {paper['abstract']}"""
     )
 
     text = "".join(block.text for block in response.content if block.type == "text")
+    return _parse_json(text)
+
+
+def _parse_json(text: str) -> dict:
+    """Pull the JSON object out of the reply, tolerating fences or a stray preamble."""
     text = text.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
-    return json.loads(text)
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError:
+        match = re.search(r"\{.*\}", text, re.DOTALL)
+        if not match:
+            raise ValueError(f"No JSON object in model reply: {text[:200]}")
+        data = json.loads(match.group(0))
+
+    missing = {"summary_en", "summary_fa"} - data.keys()
+    if missing:
+        raise ValueError(f"Model reply missing key(s): {sorted(missing)}")
+    return data

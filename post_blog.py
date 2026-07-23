@@ -14,6 +14,11 @@ import re
 import requests
 
 
+def _yaml_str(value: str) -> str:
+    """Quote a value for YAML frontmatter. Titles often contain ':' and '"'."""
+    return '"' + (value or "").replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+
 def _slugify(title: str) -> str:
     slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
     return slug[:80]
@@ -22,16 +27,16 @@ def _slugify(title: str) -> str:
 def publish_markdown(paper: dict, summary_en: str, summary_fa: str, out_dir: str = "posts") -> str:
     os.makedirs(out_dir, exist_ok=True)
     today = dt.date.today().isoformat()
-    slug = _slugify(paper["title"])
+    slug = _slugify(paper["title"]) or f"paper-{paper['pmid']}"  # titles can be all non-ASCII
     path = os.path.join(out_dir, f"{today}-{slug}.md")
 
     content = f"""---
-title: "{paper['title']}"
+title: {_yaml_str(paper['title'])}
 date: {today}
-journal: "{paper['journal']}"
-year: "{paper['year']}"
+journal: {_yaml_str(paper['journal'])}
+year: {_yaml_str(paper['year'])}
 source_url: {paper['url']}
-doi: "{paper['doi']}"
+doi: {_yaml_str(paper['doi'])}
 ---
 
 ## Summary

@@ -5,6 +5,8 @@ by keyword, and returns candidates that haven't been posted yet.
 PubMed's E-utilities are free and don't require an API key (an optional key
 just raises your rate limit). Docs: https://www.ncbi.nlm.nih.gov/books/NBK25501/
 """
+from __future__ import annotations  # `str | None` annotations on Python 3.9 (macOS system python)
+
 import os
 import time
 import xml.etree.ElementTree as ET
@@ -12,6 +14,13 @@ import xml.etree.ElementTree as ET
 import requests
 
 EUTILS = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
+
+
+def _all_text(node) -> str:
+    """Flatten an element's text, including text inside nested inline markup."""
+    if node is None:
+        return ""
+    return " ".join("".join(node.itertext()).split())
 
 
 def _esearch(journal: str, lookback_days: int, api_key: str | None) -> list[str]:
@@ -45,13 +54,25 @@ def _efetch(pmids: list[str], api_key: str | None) -> list[dict]:
     papers = []
     for article in root.findall(".//PubmedArticle"):
         pmid = article.findtext(".//PMID", default="")
-        title = article.findtext(".//ArticleTitle", default="").strip()
-        abstract_parts = [
-            (node.text or "") for node in article.findall(".//AbstractText")
-        ]
+        title_node = article.find(".//ArticleTitle")
+        title = _all_text(title_node)
+
+        # Structured abstracts split into labelled sections (BACKGROUND, METHODS...);
+        # itertext keeps text inside inline markup like <i> or <sup>, which .text drops.
+        abstract_parts = []
+        for node in article.findall(".//Abstract/AbstractText"):
+            chunk = _all_text(node)
+            if not chunk:
+                continue
+            label = node.get("Label")
+            abstract_parts.append(f"{label.title()}: {chunk}" if label else chunk)
         abstract = " ".join(abstract_parts).strip()
         journal = article.findtext(".//Journal/Title", default="")
+        # Some records carry no <Year>, only a free-text MedlineDate like "2024 Jan-Feb".
         pubdate_year = article.findtext(".//JournalIssue/PubDate/Year", default="")
+        if not pubdate_year:
+            medline_date = article.findtext(".//JournalIssue/PubDate/MedlineDate", default="")
+            pubdate_year = medline_date.split()[0] if medline_date else ""
 
         authors = []
         for a in article.findall(".//AuthorList/Author"):
@@ -90,11 +111,12 @@ def keyword_match(paper: dict, keywords: list[str]) -> bool:
 
 def fetch_candidates(journals: list[str], keywords: list[str], lookback_days: int) -> list[dict]:
     api_key = os.getenv("NCBI_API_KEY") or None
-    all_papers = []
+    by_pmid: dict[str, dict] = {}
     for journal in journals:
         pmids = _esearch(journal, lookback_days, api_key)
         time.sleep(0.35 if not api_key else 0.11)  # stay under NCBI's rate limit
-        all_papers.extend(_efetch(pmids, api_key))
+        for paper in _efetch(pmids, api_key):
+            by_pmid.setdefault(paper["pmid"], paper)  # same paper can match two journals
         time.sleep(0.35 if not api_key else 0.11)
 
-    return [p for p in all_papers if keyword_match(p, keywords)]
+    return [p for p in by_pmid.values() if keyword_match(p, keywords)]
