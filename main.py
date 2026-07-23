@@ -57,8 +57,10 @@ def process(paper: dict, cfg: dict, summary: dict | None = None, dry_run: bool =
         print("--- end ---\n")
         return
 
-    post_to_telegram(paper, summary_en, summary_fa)
-    print("  -> posted to Telegram")
+    message_id = post_to_telegram(paper, summary_en, summary_fa)
+    handle = os.getenv("TELEGRAM_CHANNEL_ID", "").lstrip("@")
+    where = f"https://t.me/{handle}/{message_id}" if not handle.startswith("-") else f"message {message_id}"
+    print(f"  -> posted to Telegram: {where}")
 
     if cfg["publish_target"] == "wordpress":
         print(f"  -> posted to WordPress: {publish_wordpress(paper, summary_en, summary_fa)}")

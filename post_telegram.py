@@ -35,7 +35,7 @@ def build_message(paper: dict, summary_en: str, summary_fa: str) -> str:
     return header + body + footer
 
 
-def post_to_telegram(paper: dict, summary_en: str, summary_fa: str) -> None:
+def post_to_telegram(paper: dict, summary_en: str, summary_fa: str) -> int:
     token = os.environ["TELEGRAM_BOT_TOKEN"]
     chat_id = os.environ["TELEGRAM_CHANNEL_ID"]
 
@@ -52,3 +52,4 @@ def post_to_telegram(paper: dict, summary_en: str, summary_fa: str) -> None:
     if not resp.ok:
         # Telegram puts the actual reason in the body; raise_for_status hides it.
         raise RuntimeError(f"Telegram API error {resp.status_code}: {resp.text}")
+    return resp.json()["result"]["message_id"]
