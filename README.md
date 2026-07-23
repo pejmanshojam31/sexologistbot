@@ -72,6 +72,26 @@ main.py           -> runs the above in order, skips papers already posted
    to 30 for the first run — the target journals publish a few papers a week,
    not daily.
 
+## The film strand
+
+A separate track for erotic cinema — films that treat sexuality as a serious
+subject — written up in the same analytical register as the papers, in Farsi.
+
+```
+./run.sh --film --dry-run              # preview the next unposted film
+./run.sh --film                        # post it
+./run.sh --film "Belle de Jour"        # post a specific one
+```
+
+The list is `config/films.yaml` and is maintained by hand — there's no PubMed
+equivalent here. Only `title` and `year` are required, but filling in `note` is
+what makes the write-up an argument rather than a plot recap. Posted films are
+tracked in `data/posted_films.json`, keyed by title and year so reordering the
+YAML doesn't cause reposts.
+
+These posts are tagged `#سینمای_اروتیک` rather than `#پژوهش_جنسی`, so the two
+strands stay separable in the channel.
+
 ## Archive mode: most-cited papers from earlier years
 
 These journals don't publish every day, so on quiet days the bot can post a

@@ -22,9 +22,17 @@ from dotenv import load_dotenv
 
 from fetch_classics import fetch_top_cited
 from fetch_papers import fetch_by_pmid, fetch_candidates
+from films import film_id, next_film, save_posted as save_posted_film
 from post_blog import publish_markdown, publish_wordpress
-from post_telegram import build_message, hashtag_line, post_to_telegram
-from summarize import summarize_and_translate
+from post_telegram import (
+    FILM_HASHTAGS,
+    build_film_message,
+    build_message,
+    hashtag_line,
+    post_film_to_telegram,
+    post_to_telegram,
+)
+from summarize import summarize_and_translate, summarize_film
 
 load_dotenv()
 
@@ -74,6 +82,23 @@ def process(paper: dict, cfg: dict, summary: dict | None = None, dry_run: bool =
     save_posted_id(paper["pmid"])
 
 
+def process_film(film: dict, cfg: dict, dry_run: bool = False) -> None:
+    result = summarize_film(film, cfg.get("summarizer", "you"), cfg.get("you_research_effort", "lite"))
+    hashtags = hashtag_line(result, defaults=FILM_HASHTAGS)
+
+    if dry_run:
+        print("\n--- Telegram message (dry run, nothing sent) ---")
+        print(build_film_message(film, result["summary_fa"], hashtags))
+        print("--- end ---\n")
+        return
+
+    message_id = post_film_to_telegram(film, result["summary_fa"], hashtags)
+    handle = os.getenv("TELEGRAM_CHANNEL_ID", "").lstrip("@")
+    where = f"https://t.me/{handle}/{message_id}" if not handle.startswith("-") else f"message {message_id}"
+    print(f"  -> posted to Telegram: {where}")
+    save_posted_film(film_id(film))
+
+
 def pick_classic(cfg: dict, posted_ids: set) -> dict | None:
     """Most-cited unposted paper from the configured archive year range."""
     return fetch_top_cited(
@@ -103,10 +128,27 @@ def main() -> None:
         action="store_true",
         help="if no new papers were found, fall back to a most-cited one (for the daily cron)",
     )
+    ap.add_argument(
+        "--film",
+        nargs="?",
+        const="",
+        metavar="TITLE",
+        help="post an erotic film from config/films.yaml (next unposted, or a named one)",
+    )
     args = ap.parse_args()
 
     with open(CONFIG_PATH) as f:
         cfg = yaml.safe_load(f)
+
+    if args.film is not None:
+        film = next_film(args.film or None)
+        if not film:
+            print("Every film in config/films.yaml has been posted. Add more. Done.")
+            return
+        print(f"Film: {film['title']} ({film['year']})")
+        process_film(film, cfg, dry_run=args.dry_run)
+        print("Done.")
+        return
 
     summary = None
     if args.summary_file:

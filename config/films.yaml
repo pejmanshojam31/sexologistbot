@@ -1,0 +1,79 @@
+# Erotic cinema for the channel's film strand -- works that treat sexuality as
+# a serious subject and are written about in film scholarship. Posted one at a
+# time with ./run.sh --film, tracked in data/posted_films.json.
+#
+# Add your own freely. Only `title` and `year` are required; `note` steers the
+# write-up toward what makes that film worth discussing, and is worth filling
+# in, since it's the difference between a plot recap and an actual argument.
+films:
+  - title: "In the Realm of the Senses"
+    original_title: "愛のコリーダ"
+    year: 1976
+    director: "Nagisa Oshima"
+    country: "Japan / France"
+    url: "https://en.wikipedia.org/wiki/In_the_Realm_of_the_Senses"
+    note: "Landmark censorship case; obsession and power, based on the Sada Abe incident."
+
+  - title: "Belle de Jour"
+    year: 1967
+    director: "Luis Buñuel"
+    country: "France"
+    url: "https://en.wikipedia.org/wiki/Belle_de_Jour_(film)"
+    note: "Fantasy versus desire; the gap between inner life and respectable marriage."
+
+  - title: "Last Tango in Paris"
+    year: 1972
+    director: "Bernardo Bertolucci"
+    country: "Italy / France"
+    url: "https://en.wikipedia.org/wiki/Last_Tango_in_Paris"
+    note: "Grief and anonymity. Also a key case in debates about consent on film sets."
+
+  - title: "Blue Is the Warmest Colour"
+    year: 2013
+    director: "Abdellatif Kechiche"
+    country: "France"
+    url: "https://en.wikipedia.org/wiki/Blue_Is_the_Warmest_Colour"
+    note: "Palme d'Or; queer desire and class, and the debate over its male gaze."
+
+  - title: "Portrait of a Lady on Fire"
+    year: 2019
+    director: "Céline Sciamma"
+    country: "France"
+    url: "https://en.wikipedia.org/wiki/Portrait_of_a_Lady_on_Fire"
+    note: "Looking and being looked at; often cited as a model of the female gaze."
+
+  - title: "The Handmaiden"
+    original_title: "아가씨"
+    year: 2016
+    director: "Park Chan-wook"
+    country: "South Korea"
+    url: "https://en.wikipedia.org/wiki/The_Handmaiden"
+    note: "Desire as a means of escaping patriarchal and colonial control."
+
+  - title: "Shame"
+    year: 2011
+    director: "Steve McQueen"
+    country: "United Kingdom"
+    url: "https://en.wikipedia.org/wiki/Shame_(2011_film)"
+    note: "Compulsive sexual behaviour portrayed as isolation rather than pleasure."
+
+  - title: "Eyes Wide Shut"
+    year: 1999
+    director: "Stanley Kubrick"
+    country: "United States / United Kingdom"
+    url: "https://en.wikipedia.org/wiki/Eyes_Wide_Shut"
+    note: "Jealousy and fantasy inside a marriage; adapted from Schnitzler's Traumnovelle."
+
+  - title: "Y Tu Mamá También"
+    year: 2001
+    director: "Alfonso Cuarón"
+    country: "Mexico"
+    url: "https://en.wikipedia.org/wiki/Y_Tu_Mam%C3%A1_Tambi%C3%A9n"
+    note: "Adolescent sexuality against class division and mortality."
+
+  - title: "Secretary"
+    year: 2002
+    director: "Steven Shainberg"
+    country: "United States"
+    url: "https://en.wikipedia.org/wiki/Secretary_(2002_film)"
+    note: "One of the few mainstream films to treat BDSM as negotiated rather than pathological."

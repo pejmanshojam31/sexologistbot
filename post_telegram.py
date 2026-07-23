@@ -7,6 +7,8 @@ Uses HTML parse mode rather than Markdown: paper titles routinely contain
 underscores, asterisks and brackets, which Telegram's Markdown parser rejects
 with a 400. HTML only needs &, < and > escaped.
 """
+from __future__ import annotations  # `list | None` annotations on Python 3.9
+
 import html
 import os
 import re
@@ -22,6 +24,7 @@ def _esc(text: str) -> str:
 
 
 DEFAULT_HASHTAGS = ["#پژوهش_جنسی"]
+FILM_HASHTAGS = ["#سینمای_اروتیک"]
 
 # Telegram ends a hashtag at the first character that isn't a letter, digit or
 # underscore. Persian text is full of ZWNJ (U+200C, as in می‌شود), which would
@@ -36,10 +39,10 @@ def clean_hashtag(tag: str) -> str:
     return f"#{tag}" if tag else ""
 
 
-def hashtag_line(summary: dict) -> str:
+def hashtag_line(summary: dict, defaults: list | None = None) -> str:
     tags = summary.get("hashtags_fa") or []
     cleaned = [t for t in (clean_hashtag(x) for x in tags) if t]
-    for fallback in DEFAULT_HASHTAGS:
+    for fallback in DEFAULT_HASHTAGS if defaults is None else defaults:
         if fallback not in cleaned:
             cleaned.append(fallback)
     # dict.fromkeys keeps first-seen order while dropping duplicates
@@ -74,6 +77,49 @@ def build_message(paper: dict, summary_en: str, summary_fa: str, hashtags: str =
     if len(body) > budget:
         body = body[: max(budget - 1, 0)].rstrip() + "…"
     return header + body + footer
+
+
+def build_film_message(film: dict, summary_fa: str, hashtags: str = "") -> str:
+    byline_parts = [p for p in (film.get("director"), film.get("country")) if p]
+    title = film["title"]
+    if film.get("original_title"):
+        title += f" · {film['original_title']}"
+
+    message = f"🎬 <b>{_esc(title)} ({_fa_digits(film['year'])})</b>\n"
+    if byline_parts:
+        message += f"<i>{_esc(' — '.join(byline_parts))}</i>\n"
+    message += f"\n{_esc(summary_fa)}"
+
+    if film.get("url"):
+        message += f'\n\n<a href="{_esc(film["url"])}">اطلاعات بیشتر</a>'
+    if hashtags:
+        message += f"\n\n{_esc(hashtags)}"
+
+    return message if len(message) <= MAX_LEN else message[: MAX_LEN - 1].rstrip() + "…"
+
+
+def post_film_to_telegram(film: dict, summary_fa: str, hashtags: str = "") -> int:
+    token = os.environ["TELEGRAM_BOT_TOKEN"]
+    chat_id = os.environ["TELEGRAM_CHANNEL_ID"]
+
+    payload = {
+        "chat_id": chat_id,
+        "text": build_film_message(film, summary_fa, hashtags),
+        "parse_mode": "HTML",
+    }
+    if film.get("url"):
+        payload["link_preview_options"] = {
+            "url": film["url"],
+            "prefer_large_media": True,
+            "show_above_text": True,
+        }
+
+    resp = requests.post(
+        f"https://api.telegram.org/bot{token}/sendMessage", json=payload, timeout=30
+    )
+    if not resp.ok:
+        raise RuntimeError(f"Telegram API error {resp.status_code}: {resp.text}")
+    return resp.json()["result"]["message_id"]
 
 
 def post_to_telegram(paper: dict, summary_en: str, summary_fa: str, hashtags: str = "") -> int:
