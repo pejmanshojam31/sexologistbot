@@ -1,0 +1,83 @@
+# Sex Research → Telegram + Blog bot
+
+Daily pipeline: searches PubMed for new papers in a set list of journals,
+keeps ones matching your keywords, picks one, summarizes it, translates the
+summary to Farsi, and posts it to your Telegram channel + writes a blog post.
+
+## How it works
+
+```
+fetch_papers.py   -> queries PubMed for the last N days, filters by keyword
+summarize.py      -> Claude summarizes the abstract + translates to Farsi
+post_telegram.py  -> posts the result to your Telegram channel
+post_blog.py      -> writes a markdown post (or posts to WordPress)
+main.py           -> runs the above in order, skips papers already posted
+```
+
+## One-time setup
+
+1. **Install dependencies**
+   ```
+   pip install -r requirements.txt
+   ```
+
+2. **Get an Anthropic API key**: console.anthropic.com -> API Keys.
+   (Separate from a claude.ai subscription — this is pay-per-use, usually
+   a few cents per run.)
+
+3. **Create a Telegram bot**: message **@BotFather** on Telegram, run
+   `/newbot`, follow the prompts, copy the token it gives you.
+
+4. **Add the bot to your channel as an admin** (Channel -> Administrators ->
+   Add Admin -> your bot). It needs admin rights to post.
+
+5. **Get your channel ID**: if your channel is public, it's just
+   `@your_channel_name`. If private, forward any message from the channel
+   to `@userinfobot` to get the numeric ID (looks like `-1001234567890`).
+
+6. Copy `.env.example` to `.env` and fill in the values from steps 2-5.
+
+7. Edit `config/settings.yaml` — check the journal list and, importantly,
+   **replace the keyword list with your actual keywords.**
+
+8. Test it locally:
+   ```
+   python main.py
+   ```
+   Check your Telegram channel and the `posts/` folder.
+
+## Running it daily (pick one)
+
+**Option A — GitHub Actions (recommended, free, no server needed)**
+1. Push this folder to a new GitHub repo.
+2. Repo -> Settings -> Secrets and variables -> Actions -> add:
+   `ANTHROPIC_API_KEY`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHANNEL_ID`
+   (and `NCBI_API_KEY` if you got one).
+3. That's it — `.github/workflows/daily.yml` runs it every day at 09:00 UTC
+   and commits new posts back to the repo automatically. Edit the cron line
+   to change the time.
+4. You can also trigger a run manually from the repo's "Actions" tab.
+
+**Option B — your own server/cron**
+Add this line to `crontab -e`:
+```
+0 9 * * * cd /path/to/sexresearch-bot && /usr/bin/python3 main.py >> run.log 2>&1
+```
+
+## Getting an actual blog out of `posts/`
+
+The `posts/` folder fills up with dated markdown files with frontmatter —
+that's the format Hugo, Jekyll, Astro, and Eleventy all expect. Cheapest
+path: point a free Hugo/Jekyll site at this repo and host it on GitHub
+Pages — zero monthly cost, updates automatically since the Action commits
+new posts. If you already run WordPress, set `publish_target: "wordpress"`
+in `config/settings.yaml` and fill in the `WORDPRESS_*` values in `.env`
+instead.
+
+## Tuning
+
+- `config/settings.yaml`: journals, keywords, lookback window, posts/run.
+- `summarize.py`: swap `MODEL` to `claude-haiku-4-5-20251001` for a
+  cheaper/faster run, or edit `SYSTEM_PROMPT` to change tone/length.
+- `data/posted_ids.json`: tracks what's already been posted, so reruns
+  don't duplicate. Delete it to reset.
