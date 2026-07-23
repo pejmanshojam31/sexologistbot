@@ -48,7 +48,9 @@ def save_posted_id(pmid: str) -> None:
 
 def process(paper: dict, cfg: dict, summary: dict | None = None, dry_run: bool = False) -> None:
     """Summarize (unless one is supplied), then post to Telegram and the blog."""
-    result = summary or summarize_and_translate(paper)
+    result = summary or summarize_and_translate(
+        paper, cfg.get("summarizer", "you"), cfg.get("you_research_effort", "lite")
+    )
     summary_en, summary_fa = result["summary_en"], result["summary_fa"]
 
     if dry_run:

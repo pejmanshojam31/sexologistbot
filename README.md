@@ -23,9 +23,15 @@ main.py           -> runs the above in order, skips papers already posted
    ```
    Run everything below with `.venv/bin/python` instead of `python`.
 
-2. **Get an Anthropic API key**: console.anthropic.com -> API Keys.
-   (Separate from a claude.ai subscription — this is pay-per-use, usually
-   a few cents per run.)
+2. **Get an API key for the summarizer.** Two backends are supported, chosen
+   with `summarizer:` in `config/settings.yaml`:
+
+   - `"you"` (default) — You.com Research API, key from https://api.you.com.
+     Fast (~5s per paper) and inexpensive.
+   - `"anthropic"` — console.anthropic.com -> API Keys. Pay-per-use, separate
+     from a claude.ai subscription.
+
+   You only need a key for the backend you actually use.
 
 3. **Create a Telegram bot**: message **@BotFather** on Telegram, run
    `/newbot`, follow the prompts, copy the token it gives you.
@@ -90,8 +96,9 @@ The file is just `{"summary_en": "...", "summary_fa": "..."}`. See
 **Option A — GitHub Actions (recommended, free, no server needed)**
 1. Push this folder to a new GitHub repo.
 2. Repo -> Settings -> Secrets and variables -> Actions -> add:
-   `ANTHROPIC_API_KEY`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHANNEL_ID`
-   (and `NCBI_API_KEY` if you got one).
+   `YOU_API_KEY`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHANNEL_ID`
+   (plus `ANTHROPIC_API_KEY` only if you switched the summarizer, and
+   `NCBI_API_KEY` if you got one).
 3. That's it — `.github/workflows/daily.yml` runs it every day at 09:00 UTC
    and commits new posts back to the repo automatically. Edit the cron line
    to change the time.

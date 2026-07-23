@@ -77,6 +77,15 @@ exclude_keywords:
   - "phylogen"
   - "conspecific"
 
+# Which API writes the summaries: "you" (You.com Research, YOU_API_KEY) or
+# "anthropic" (ANTHROPIC_API_KEY). You.com is fast (~5s) and inexpensive.
+summarizer: "you"
+
+# You.com only: "lite", "standard", or "deep". The abstract is supplied in the
+# prompt and outside sources are explicitly disallowed, so there is nothing for
+# the higher efforts to research -- "lite" is the right choice here.
+you_research_effort: "lite"
+
 # How many days back to search each run (run daily -> 1-2 is usually enough;
 # set higher for the first run to backfill, or use --lookback).
 lookback_days: 2

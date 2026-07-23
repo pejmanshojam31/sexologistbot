@@ -21,6 +21,9 @@ jobs:
 
       - name: Run pipeline
         env:
+          # summarizer: "you" in config/settings.yaml -> only YOU_API_KEY is needed.
+          # ANTHROPIC_API_KEY is only used if you switch the summarizer over.
+          YOU_API_KEY: ${{ secrets.YOU_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
