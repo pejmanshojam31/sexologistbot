@@ -16,10 +16,12 @@ main.py           -> runs the above in order, skips papers already posted
 
 ## One-time setup
 
-1. **Install dependencies**
+1. **Install dependencies** into a virtualenv (keeps them out of system Python):
    ```
-   pip install -r requirements.txt
+   python3 -m venv .venv
+   .venv/bin/pip install -r requirements.txt
    ```
+   Run everything below with `.venv/bin/python` instead of `python`.
 
 2. **Get an Anthropic API key**: console.anthropic.com -> API Keys.
    (Separate from a claude.ai subscription — this is pay-per-use, usually
@@ -42,9 +44,12 @@ main.py           -> runs the above in order, skips papers already posted
 
 8. Test it locally:
    ```
-   python main.py
+   .venv/bin/python main.py
    ```
-   Check your Telegram channel and the `posts/` folder.
+   Check your Telegram channel and the `posts/` folder. If it prints
+   "Nothing new to post", raise `lookback_days` in `config/settings.yaml`
+   to 30 for the first run — the target journals publish a few papers a week,
+   not daily.
 
 ## Running it daily (pick one)
 
