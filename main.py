@@ -22,7 +22,7 @@ from dotenv import load_dotenv
 
 from fetch_papers import fetch_by_pmid, fetch_candidates
 from post_blog import publish_markdown, publish_wordpress
-from post_telegram import build_message, post_to_telegram
+from post_telegram import build_message, hashtag_line, post_to_telegram
 from summarize import summarize_and_translate
 
 load_dotenv()
@@ -52,14 +52,15 @@ def process(paper: dict, cfg: dict, summary: dict | None = None, dry_run: bool =
         paper, cfg.get("summarizer", "you"), cfg.get("you_research_effort", "lite")
     )
     summary_en, summary_fa = result["summary_en"], result["summary_fa"]
+    hashtags = hashtag_line(result)
 
     if dry_run:
         print("\n--- Telegram message (dry run, nothing sent) ---")
-        print(build_message(paper, summary_en, summary_fa))
+        print(build_message(paper, summary_en, summary_fa, hashtags))
         print("--- end ---\n")
         return
 
-    message_id = post_to_telegram(paper, summary_en, summary_fa)
+    message_id = post_to_telegram(paper, summary_en, summary_fa, hashtags)
     handle = os.getenv("TELEGRAM_CHANNEL_ID", "").lstrip("@")
     where = f"https://t.me/{handle}/{message_id}" if not handle.startswith("-") else f"message {message_id}"
     print(f"  -> posted to Telegram: {where}")

@@ -42,8 +42,15 @@ Write TWO summaries:
    "رضایت‌مندی" for satisfaction, since plain "رضایت" is ambiguous between the
    two and these papers often contrast them.
 
+3. hashtags_fa -- 3 to 5 Farsi hashtags for this specific paper, so posts can
+   be found later by topic. Use underscores instead of spaces (Telegram ends a
+   hashtag at the first space). Pick terms a reader would actually search:
+   the topic, the population, and the study type, e.g.
+   ["#سلامت_جنسی", "#زنان_سالمند", "#کارآزمایی_بالینی"].
+   Always include #پژوهش_جنسی as one of them so the whole archive is findable.
+
 Return ONLY a JSON object, no markdown fences, no preamble, with this exact shape:
-{"summary_en": "...", "summary_fa": "..."}"""
+{"summary_en": "...", "summary_fa": "...", "hashtags_fa": ["#...", "#..."]}"""
 
 
 def _user_prompt(paper: dict) -> str:
