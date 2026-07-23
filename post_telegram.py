@@ -20,8 +20,13 @@ def _esc(text: str) -> str:
     return html.escape(text or "", quote=False)
 
 
+def article_link(paper: dict) -> str:
+    """Publisher's article page (via DOI) when we have one, else PubMed."""
+    return paper.get("journal_url") or paper["url"]
+
+
 def build_message(paper: dict, summary_en: str, summary_fa: str) -> str:
-    link = paper["url"]
+    link = article_link(paper)
     header = (
         f"📄 <b>{_esc(paper['title'])}</b>\n"
         f"<i>{_esc(paper['journal'])}, {_esc(paper['year'])}</i>\n\n"
@@ -45,7 +50,13 @@ def post_to_telegram(paper: dict, summary_en: str, summary_fa: str) -> int:
             "chat_id": chat_id,
             "text": build_message(paper, summary_en, summary_fa),
             "parse_mode": "HTML",
-            "disable_web_page_preview": False,
+            # Pull the preview from the publisher's page and show it large,
+            # above the text, so each post leads with that paper's own figure.
+            "link_preview_options": {
+                "url": article_link(paper),
+                "prefer_large_media": True,
+                "show_above_text": True,
+            },
         },
         timeout=30,
     )

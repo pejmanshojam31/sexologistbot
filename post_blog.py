@@ -35,7 +35,8 @@ title: {_yaml_str(paper['title'])}
 date: {today}
 journal: {_yaml_str(paper['journal'])}
 year: {_yaml_str(paper['year'])}
-source_url: {paper['url']}
+source_url: {paper.get('journal_url') or paper['url']}
+pubmed_url: {paper['url']}
 doi: {_yaml_str(paper['doi'])}
 ---
 
@@ -48,7 +49,8 @@ doi: {_yaml_str(paper['doi'])}
 {summary_fa}
 
 ---
-Source: [{paper['journal']}]({paper['url']})
+Source: [{paper['journal']}]({paper.get('journal_url') or paper['url']}) ·
+[PubMed]({paper['url']})
 """
     with open(path, "w", encoding="utf-8") as f:
         f.write(content)

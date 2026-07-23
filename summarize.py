@@ -24,10 +24,11 @@ information and do not invent findings that aren't in the abstract.
 
 Write TWO summaries:
 
-1. summary_en -- 2-4 sentences of plain-language English. A concise headline
-   version of the finding.
+1. summary_en -- 5 to 7 sentences of plain-language English. Cover the
+   question, the method and sample, the main findings with their numbers, and
+   the takeaway. Not a headline -- a proper short account of the study.
 
-2. summary_fa -- a DETAILED Farsi summary, 6 to 10 sentences, natural and
+2. summary_fa -- a DETAILED Farsi summary, 10 to 14 sentences, natural and
    fluent (not a word-for-word translation of the English). This is the main
    content for the channel's Farsi-speaking readers, so include:
      - what question the study asked and why it matters
@@ -35,6 +36,8 @@ Write TWO summaries:
      - the specific findings, including which factors mattered most
      - what was measured but did NOT reach significance
      - the practical takeaway, and any limitation the abstract itself states
+       (if the abstract states none, simply leave it out -- do not speculate
+       about limitations, and do not remark on their absence)
    Use Persian digits for numbers. Prefer "توافق" for consent and
    "رضایت‌مندی" for satisfaction, since plain "رضایت" is ambiguous between the
    two and these papers often contrast them.

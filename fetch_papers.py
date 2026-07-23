@@ -82,7 +82,10 @@ def _efetch(pmids: list[str], api_key: str | None) -> list[dict]:
     root = ET.fromstring(r.content)
     papers = []
     for article in root.findall(".//PubmedArticle"):
-        pmid = article.findtext(".//PMID", default="")
+        # Anchor to the citation itself. A ".//" search here would also match
+        # the <ReferenceList>, where every cited paper carries its own PMID and
+        # DOI -- that silently yields another paper's identifiers.
+        pmid = article.findtext("MedlineCitation/PMID", default="")
         title_node = article.find(".//ArticleTitle")
         title = _all_text(title_node)
 
@@ -111,10 +114,19 @@ def _efetch(pmids: list[str], api_key: str | None) -> list[dict]:
             if last:
                 authors.append(f"{fore} {last}".strip() if fore else last)
 
+        # Same trap as the PMID above: PubmedData/ArticleIdList is this
+        # article's own id list, while .//ArticleIdList also sweeps up the
+        # reference list. ELocationID is the more direct source when present.
         doi = ""
-        for eid in article.findall(".//ArticleIdList/ArticleId"):
-            if eid.get("IdType") == "doi":
-                doi = eid.text or ""
+        for eloc in article.findall("MedlineCitation/Article/ELocationID"):
+            if eloc.get("EIdType") == "doi" and eloc.text:
+                doi = eloc.text.strip()
+                break
+        if not doi:
+            for aid in article.findall("PubmedData/ArticleIdList/ArticleId"):
+                if aid.get("IdType") == "doi" and aid.text:
+                    doi = aid.text.strip()
+                    break
 
         if not abstract:
             continue  # skip papers with no abstract, nothing to summarize
@@ -129,6 +141,12 @@ def _efetch(pmids: list[str], api_key: str | None) -> list[dict]:
                 "authors": authors,
                 "doi": doi,
                 "url": f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/",
+                # Link posts at the publisher's article page rather than PubMed:
+                # doi.org redirects there, and Telegram pulls that page's
+                # og:image, so each post gets its own figure instead of the
+                # same PubMed logo every time. Falls back to PubMed if no DOI.
+                "journal_url": f"https://doi.org/{doi}" if doi else
+                               f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/",
             }
         )
     return papers
