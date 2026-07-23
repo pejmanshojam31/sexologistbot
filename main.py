@@ -102,8 +102,9 @@ def main() -> None:
     posted_ids = load_posted_ids()
     lookback = args.lookback or cfg["lookback_days"]
 
-    print(f"Searching {len(cfg['journals'])} journals, last {lookback} day(s)...")
-    candidates = fetch_candidates(cfg["journals"], cfg["keywords"], lookback)
+    n = len(cfg.get("topic_journals", [])) + len(cfg.get("general_journals", []))
+    print(f"Searching {n} journals, last {lookback} day(s)...")
+    candidates = fetch_candidates(cfg, lookback)
     candidates = [p for p in candidates if p["pmid"] not in posted_ids]
     print(f"Found {len(candidates)} new keyword-matching paper(s).")
 

@@ -1,28 +1,84 @@
-# Journals to search. Must match PubMed's indexed journal name.
-# Add/remove freely -- these are just sensible defaults for human sexuality research.
-journals:
-  - "Archives of Sexual Behavior"
-  - "Journal of Sex Research"
-  - "Journal of Sexual Medicine"
-  - "Psychology & Sexuality"
-  - "Sexual and Relationship Therapy"
-  - "Culture, Health & Sexuality"
+# ---------------------------------------------------------------------------
+# Journals dedicated to sexuality research. Essentially everything they publish
+# is on topic, so NO keyword filter is applied -- we take all of it.
+# Names must match PubMed's indexed title exactly (verified against PubMed).
+# ---------------------------------------------------------------------------
+topic_journals:
+  - "Archives of sexual behavior"
+  - "Journal of sex research"
+  - "The journal of sexual medicine"
+  - "Sexual medicine reviews"
+  - "Culture, health & sexuality"
+  - "Psychology and sexuality"   # sparsely indexed in PubMed (~21 papers total)
 
-# Paper is selected only if title/abstract matches at least one keyword (case-insensitive).
-# Edit this list to match what you actually want covered.
+# ---------------------------------------------------------------------------
+# General-scope journals. These publish hundreds of unrelated papers a day
+# (Scientific Reports alone is ~200/day), so the keyword list below is pushed
+# INTO the PubMed query rather than applied afterwards -- otherwise we'd only
+# ever see an arbitrary truncated slice of each day's output.
+#
+# Editorial note: you wanted Nature Medicine only for practice-changing results
+# and npj Women's Health only when women-focused. Neither is mechanizable, so
+# both are simply included -- expect to skip some manually. Volume is low
+# (npj Women's Health has 48 papers total), so this is rarely a burden.
+# ---------------------------------------------------------------------------
+general_journals:
+  - "Nature human behaviour"
+  - "Nature communications"
+  - "Communications psychology"
+  - "Scientific reports"
+  - "Nature mental health"
+  - "Nature medicine"
+  - "npj women's health"
+
+# Applied as a title/abstract query against general_journals only.
 keywords:
   - "sexual behavior"
   - "sexual behaviour"
   - "sexual desire"
   - "sexual health"
-  - "intimacy"
-  - "sexual orientation"
-  - "sexual satisfaction"
+  - "sexual function"
   - "sexual dysfunction"
+  - "sexual satisfaction"
+  - "sexual orientation"
+  - "sexual violence"
+  - "sexuality"
+  - "intimacy"
+  - "sexual consent"
   - "relationship satisfaction"
+  - "contraception"
+  - "erectile"
+  - "orgasm"
+
+# Dropped if any of these appear in the title/abstract. The general journals
+# publish a lot of animal mating-behaviour work that matches "sexual behavior"
+# but is not what this channel covers. (A humans[MeSH] filter would be cleaner,
+# but MeSH terms are assigned weeks after publication, so it would exclude
+# everything recent.)
+exclude_keywords:
+  - "mice"
+  - "mouse"
+  - "rats"
+  - "rat "
+  - "drosophila"
+  - "zebrafish"
+  - "c. elegans"
+  - "macaque"
+  - "primate"
+  - "songbird"
+  - "beetle"
+  - "insect"
+  - "livestock"
+  - "in vitro"
+  # evolutionary-biology framing: reliably animal work, never this channel's topic
+  - "sexual selection"
+  - "experimental evolution"
+  - "evolutionary biology"
+  - "phylogen"
+  - "conspecific"
 
 # How many days back to search each run (run daily -> 1-2 is usually enough;
-# set higher for the first run to backfill).
+# set higher for the first run to backfill, or use --lookback).
 lookback_days: 2
 
 # Max number of papers to post per run. Keep at 1 for "one paper a day" style.

@@ -114,9 +114,34 @@ paid plan.) If you already run WordPress, set `publish_target: "wordpress"`
 in `config/settings.yaml` and fill in the `WORDPRESS_*` values in `.env`
 instead.
 
+## Journal coverage
+
+`config/settings.yaml` splits journals into two groups, searched differently:
+
+- **`topic_journals`** — dedicated sexuality journals. Everything they publish
+  is on topic, so no keyword filter is applied.
+- **`general_journals`** — Nature-family and other broad journals. The keyword
+  list is pushed *into* the PubMed query for these. This matters: Scientific
+  Reports publishes ~200 papers a day, so filtering after the fetch would only
+  ever see an arbitrary truncated slice of the day's output.
+
+`exclude_keywords` then drops animal work (seed beetles, mice, sexual-selection
+studies) that matches "sexual behaviour" but isn't what this channel covers.
+
+**Not available via PubMed.** These aren't indexed in MEDLINE, so this pipeline
+cannot reach them — they'd need a separate source (Scopus, Crossref, or RSS):
+
+- Sexuality Research and Social Policy
+- Sexual and Relationship Therapy
+
+Journal names must match PubMed's indexed title *exactly*. `Psychology &
+Sexuality` matches nothing; `Psychology and sexuality` is correct. To check a
+name before adding it, search `"Journal Name"[Journal]` on pubmed.ncbi.nlm.nih.gov
+— zero results means the name is wrong or the journal isn't indexed.
+
 ## Tuning
 
-- `config/settings.yaml`: journals, keywords, lookback window, posts/run.
+- `config/settings.yaml`: journals, keywords, exclusions, lookback, posts/run.
 - `summarize.py`: swap `MODEL` to `claude-haiku-4-5-20251001` for a
   cheaper/faster run, or edit `SYSTEM_PROMPT` to change tone/length.
 - `data/posted_ids.json`: tracks what's already been posted, so reruns

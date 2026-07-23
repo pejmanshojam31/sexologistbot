@@ -22,7 +22,15 @@ Return ONLY a JSON object, no markdown fences, no preamble, with this exact shap
 
 
 def summarize_and_translate(paper: dict) -> dict:
-    client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+    api_key = os.getenv("ANTHROPIC_API_KEY")
+    if not api_key:
+        raise SystemExit(
+            "ANTHROPIC_API_KEY is not set, so the summary can't be generated.\n"
+            "Either add a funded key to .env, or write the summary yourself and pass it:\n"
+            f"  python main.py --pmid {paper['pmid']} --summary-file your_summary.json\n"
+            '  (file format: {"summary_en": "...", "summary_fa": "..."})'
+        )
+    client = anthropic.Anthropic(api_key=api_key)
 
     user_prompt = f"""Title: {paper['title']}
 Journal: {paper['journal']} ({paper['year']})
