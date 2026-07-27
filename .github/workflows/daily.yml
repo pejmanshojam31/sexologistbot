@@ -2,7 +2,11 @@ name: Daily paper post
 
 on:
   schedule:
-    - cron: "0 9 * * *"   # 09:00 UTC every day - edit to your preferred time
+    # 07:00 UTC = 09:00 in central Europe during summer (CEST, UTC+2).
+    # Note: this does NOT auto-adjust for winter -- when clocks go back to CET
+    # (UTC+1) in late October, this fires at 08:00 local. Change to "0 8 * * *"
+    # then if you want it to stay at 09:00 year-round.
+    - cron: "0 7 * * *"
   workflow_dispatch: {}    # lets you also trigger it manually from the Actions tab
 
 jobs:
