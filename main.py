@@ -99,6 +99,30 @@ def process_film(film: dict, cfg: dict, dry_run: bool = False) -> None:
     save_posted_film(film_id(film))
 
 
+def preflight(cfg: dict) -> None:
+    """Fail early with a clear message if a required secret/env var is missing.
+
+    On GitHub Actions these come from repository secrets; locally from .env.
+    Without this, a missing secret surfaces as an opaque KeyError deep in the
+    posting step, after the run has already spent time and API calls.
+    """
+    required = ["TELEGRAM_BOT_TOKEN", "TELEGRAM_CHANNEL_ID"]
+    required.append("YOU_API_KEY" if cfg.get("summarizer", "you") == "you" else "ANTHROPIC_API_KEY")
+
+    present = {k: bool(os.getenv(k)) for k in required}
+    print("Preflight — required secrets:")
+    for k, ok in present.items():
+        print(f"  {'OK ' if ok else 'MISSING'}  {k}")
+
+    missing = [k for k, ok in present.items() if not ok]
+    if missing:
+        raise SystemExit(
+            "Missing required secret(s): " + ", ".join(missing) + ".\n"
+            "On GitHub: repo Settings -> Secrets and variables -> Actions. "
+            "Names must match exactly (case-sensitive)."
+        )
+
+
 def pick_classic(cfg: dict, posted_ids: set) -> dict | None:
     """Most-cited unposted paper from the configured archive year range."""
     return fetch_top_cited(
@@ -139,6 +163,9 @@ def main() -> None:
 
     with open(CONFIG_PATH) as f:
         cfg = yaml.safe_load(f)
+
+    if not args.dry_run:
+        preflight(cfg)
 
     if args.film is not None:
         film = next_film(args.film or None)
